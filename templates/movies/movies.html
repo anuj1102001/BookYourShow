@@ -1,0 +1,346 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movies List</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      animation: fadeIn 1s ease-in;
+      display: flex;
+      justify-content: flex-start;
+      padding: 20px;
+    }
+
+    .filter-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 20px;
+      background-color: #1f1f1f;
+      border-right: 1px solid #333;
+      width: 250px;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
+    .filter-form label,
+    .filter-form select,
+    .filter-form button {
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .filter-form select {
+      background-color: #2c2c2c;
+      border: 1px solid #444;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    .filter-form button {
+      background-color: #0d6efd;
+      border: none;
+      padding: 6px 14px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .filter-form button:hover {
+      background-color: #0b5ed7;
+    }
+
+    .container {
+      margin-left: 280px;
+      padding: 20px;
+      background-color: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      width: calc(100% - 300px);
+    }
+
+    .heading {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 3rem;
+      color: #0d6efd;
+      font-weight: bold;
+      animation: slideDown 1s ease;
+    }
+
+    .heading-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      padding: 15px 30px;
+      background: black;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .logo-box {
+      padding: 10px 20px;
+      background-color: #f5f7fa;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 60px;
+      width: 150px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .logo-box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .logo-img {
+      height: 60px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .login-btn {
+      background-color: #0d6efd;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .login-btn:hover {
+      background-color: #0b5ed7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .card {
+      background: #2a2a2a;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+
+    .card:hover img {
+      transform: scale(1.05);
+    }
+
+    .card-content {
+      padding: 16px;
+      flex-grow: 1;
+    }
+
+    .card-content h3 {
+      margin: 0 0 10px;
+      color: #0d6efd;
+      font-size: 1.3rem;
+    }
+
+    .card-content p {
+      margin: 8px 0;
+      font-size: 0.95rem;
+      color: #cccccc;
+    }
+
+    .card-content p strong {
+      color: #ffffff;
+    }
+
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: contents;
+    }
+
+    a[href*="trailer_url"] {
+      color: #0d6efd;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .user-menu {
+      position: relative;
+      display: inline-block;
+      display: flex;
+      align-items: center;
+    }
+
+    .user-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+    }
+
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background-color: #1f1f1f;
+      min-width: 160px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+      border-radius: 6px;
+      z-index: 999;
+    }
+
+    .dropdown a {
+      color: white;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.95rem;
+      transition: background 0.3s ease;
+    }
+
+    .dropdown a:hover {
+      background-color: #0d6efd;
+    }
+
+    .user-menu.active .dropdown {
+      display: block;
+    }
+
+    .username {
+      color: white;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+  </style>
+</head>
+<body>
+  <form method="get" action="{% url 'movies' %}" class="filter-form">
+    <h2 style="color: white; margin-bottom: 10px;">🎬 Filter Movies</h2>
+    <label for="language">Language:</label>
+    <select name="language" id="language">
+        <option value="">All</option>
+        {% for key, value in languages %}
+            <option value="{{ key }}" {% if selected_language == key %}selected{% endif %}>{{ value }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="genre">Genre:</label>
+    <select name="genre" id="genre">
+        <option value="">All</option>
+        {% for key, value in genres %}
+            <option value="{{ key }}" {% if selected_genre == key %}selected{% endif %}>{{ value }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="container">
+    <div class="heading-container">
+      <a href="{% url 'movies' %}">
+        <div class="logo-box">
+          <img src="{% static 'img/bookyourshow.png' %}" alt="BookYourShow Logo" class="logo-img" />
+        </div>
+      </a>
+      <!-- User Menu here -->
+      {% if user.is_authenticated %}
+        <div class="user-menu" onclick="this.classList.toggle('active')">
+          <img src="{% static 'img/user-icon.png' %}" alt="User" class="user-icon" />
+          <span class="username">{{ user.username }}</span>
+          <div class="dropdown">
+            <a href="{% url 'your_orders' %}">Your Orders</a>
+            <a href="{% url 'logout' %}">Logout</a>
+          </div>
+        </div>
+      {% else %}
+        <a href="{% url 'signin' %}">
+          <button class="login-btn">Login</button>
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="grid">
+      {% for movie in movies %}
+        <a href="{% url 'moviesview' slug=movie.slug %}" class="card-link">
+          <div class="card">
+            <img src="{{ movie.image_url }}" alt="{{ movie.title }} Poster">
+            <div class="card-content">
+              <h3>{{ movie.title }}</h3>
+              <p><strong>Genre:</strong> {{ movie.get_genre_display }}</p>
+              <p><strong>Language:</strong> {{ movie.get_language_display }}</p>
+              <p><strong>Duration:</strong> {{ movie.duration_minutes }} mins</p>
+              {% if movie.trailer_url %}
+              <p>
+                <a href="{{ movie.trailer_url }}" target="_blank">
+                  🎥 Watch Trailer
+                </a>
+              </p>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script>
+    document.body.style.opacity = 0;
+    window.addEventListener('load', () => {
+      document.body.style.transition = 'opacity 0.6s ease-in';
+      document.body.style.opacity = 1;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Filtered Movies</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f7f7f7;
+        }
+
+        .filter-form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-form label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .filter-form select {
+            margin-right: 20px;
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-form button {
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .movie-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .movie-list li {
+            background: white;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🎬 Filter Movies</h2>
+
+    <form method="get" class="filter-form">
+        <label for="language">Language:</label>
+        <select name="language" id="language">
+            <option value="">All</option>
+            {% for key, value in languages %}
+                <option value="{{ key }}" {% if selected_language == key %}selected{% endif %}>{{ value }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="genre">Genre:</label>
+        <select name="genre" id="genre">
+            <option value="">All</option>
+            {% for key, value in genres %}
+                <option value="{{ key }}" {% if selected_genre == key %}selected{% endif %}>{{ value }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <h3>🎞 Movies List</h3>
+    <ul class="movie-list">
+        {% for movie in movies %}
+            <li>
+                <strong>{{ movie.title }}</strong><br>
+                Genre: {{ movie.get_genre_display }} |
+                Language: {{ movie.get_language_display }}
+                <!-- Correct URL link generation (assuming you use slugs) -->
+                <a href="{% url 'moviesview' movie.slug %}">View Details</a>
+            </li>
+        {% empty %}
+            <li>No movies found.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

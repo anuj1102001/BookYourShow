@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Showtimes{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #fff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .date-selector {
+        display: flex;
+        background: #fff;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .date {
+        text-align: center;
+        padding: 10px 14px;
+        margin-right: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .date.active {
+        background-color: #e63b48;
+        color: #fff;
+    }
+
+    .date:not(.active) {
+        background-color: #f6f6f6;
+        color: #555;
+    }
+
+    .date.current-date {
+        background-color: red;
+        color: white;
+    }
+
+    .date small {
+        display: block;
+        font-size: 12px;
+        margin-top: 2px;
+        font-weight: normal;
+    }
+
+    .showtime-container {
+        padding: 20px;
+    }
+
+    .theatre-card {
+        background: #fff;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding: 16px;
+    }
+
+    .theatre-name {
+        font-weight: 700;
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    .theatre-location {
+        font-size: 14px;
+        color: #777;
+        margin-bottom: 12px;
+    }
+
+    .icons {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .icons img {
+        height: 20px;
+    }
+
+    .times {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .time {
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-size: 14px;
+        color: #28a745;
+        font-weight: 600;
+        cursor: pointer;
+        background-color: #fff;
+    }
+
+    .time.fast-filling {
+        color: #f4a300;
+    }
+
+    /* Ensure the link is green and without underline */
+    .time a {
+        color: #28a745; /* Green color like BookMyShow */
+        text-decoration: none; /* Remove the underline */
+    }
+
+    /* When hovering over the link, keep the green color */
+    .time a:hover {
+        color: #28a745; /* Maintain green on hover */
+    }
+
+    /* Optional: change color when the link is active or clicked */
+    .time a:active {
+        color: #218838; /* Slightly darker green when active */
+    }
+
+    .cancellation {
+        font-size: 12px;
+        color: #777;
+        margin-top: 10px;
+    }
+
+    .subtitle-note {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        font-size: 13px;
+        color: #555;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .subtitle-note img {
+        height: 16px;
+        margin-right: 6px;
+    }
+
+    .availability-legend {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .available {
+        background-color: #28a745;
+    }
+
+    .fast-filling {
+        background-color: #f4a300;
+    }
+
+    .lan-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Calendar Strip Styles */
+    .calendar-strip {
+        display: flex;
+        overflow-x: auto;
+        padding: 10px 0;
+        margin-bottom: 20px;
+        scrollbar-width: none;
+    }
+
+    .calendar-strip::-webkit-scrollbar {
+        display: none;
+    }
+
+    .calendar-day {
+        min-width: 70px;
+        text-align: center;
+        padding: 10px 0;
+        background-color: #2b2b2b;
+        border-radius: 12px;
+        margin-right: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        color: #ccc;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .calendar-day:hover {
+        background-color: #3c3c3c;
+        color: #fff;
+    }
+
+    .calendar-day.active {
+        background-color: #e50914;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .calendar-day.current-date {
+        background-color: #ff0000;
+        color: white;
+    }
+
+    .day-name {
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .day-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .month-name {
+        font-size: 0.75rem;
+    }
+
+    .redd {
+        color: red;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Calendar Strip (only one date selector now) -->
+<div class="calendar-strip">
+    {% for day in week %}
+    <form method="get" style="margin: 0;">
+        <input type="hidden" name="date" value="{{ day.date }}">
+        <button type="submit" class="calendar-day 
+    {% if selected_date %}
+        {% if day.date == selected_date %}active{% endif %}
+    {% else %}
+        {% if day.date == today %}active{% endif %}
+    {% endif %}">
+            <div class="day-name">{{ day.name }}</div>
+            <div class="day-number">{{ day.day }}</div>
+            <div class="month-name">{{ day.month }}</div>
+        </button>
+    </form>
+    {% endfor %}
+</div>
+
+<div class="subtitle-note">
+    <div>
+        <img src="{% static 'img/lan.png' %}" alt="Subtitle Icon">
+        indicates subtitle language, if subtitles are available 
+        <span class="redd">Got it</span>
+    </div>
+
+    <div class="availability-legend">
+        <span class="legend-item">
+            <span class="dot available"></span> AVAILABLE
+        </span>
+        <span class="legend-item">
+            <span class="dot fast-filling"></span> FAST FILLING
+        </span>
+        <span class="legend-item">
+            <img src="{% static 'img/lan.png' %}" alt="LAN" class="lan-icon"> SUBTITLES LANGUAGE
+        </span>
+    </div>
+</div>
+
+<div class="showtime-container">
+    {% if theater_showtimes %}
+        {% for showtime_list in theater_showtimes %}
+            <div class="theatre-card">
+                <div class="theatre-name">{{ showtime_list.0.theatre.name }}</div>
+                <div class="theatre-location">{{ showtime_list.0.theatre.location }}</div>
+                <div class="icons">
+                    <img src="{% static 'img/m-ticket.png' %}" alt="M-Ticket">
+                    <img src="{% static 'img/burger.png' %}" alt="Food & Beverage">
+                </div>
+                <div class="times">
+                    {% for show in showtime_list %}
+                        <div class="time {% if show.status == 'fast-filling' %}fast-filling{% endif %}">
+                            <!-- Wrap the time in an <a> tag to make it clickable -->
+                            <a href="{% url 'seat_selection' showtime_id=show.id %}" class="time-link">
+                                {{ show.show_time|time:"h:i A" }}
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="cancellation">Cancellation available</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No showtimes available for this movie.</p>
+    {% endif %}
+</div>
+{% endblock %}

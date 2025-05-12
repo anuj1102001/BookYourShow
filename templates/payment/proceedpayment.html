@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proceed to Payment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: darkgray;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .booking-summary, .ticket-list, .amount {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        .ticket-list h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .ticket-list p,
+        .booking-summary p,
+        .amount p {
+            margin: 5px 0;
+        }
+
+        .total-amount {
+            font-size: 18px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .pay-button {
+            width: 100%;
+            padding: 16px;
+            background-color: #305eff;
+            color: #fff;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .pay-button:hover {
+            background-color: #218838;
+        }
+
+        .icon {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Payment Details</h1>
+    </div>
+
+    <div class="booking-summary">
+        <p><strong>Movie / Showtime:</strong> {{ showtime.movie.title }} / {{ formatted_time }}</p>
+        <p><strong>User:</strong> {{ user.username }}</p>
+    </div>
+
+    <div class="ticket-list">
+        <h3>Selected Seats</h3>
+        <p>Seats: {% for seat in ticket %}{{ seat }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    </div>
+
+    <div class="amount">
+        <p><strong>Total Amount: ₹{{ total_amount }}</strong></p>
+        <p>Convenience Fee: ₹{{ convenience_fee }}</p>
+        <p class="total-amount">Amount to Pay: ₹{{ sub_total }}</p>
+    </div>
+
+    <!-- Submit button styled as a Stripe button -->
+    <form method="post" action="{% url 'payment' booking.id %}">
+        {% csrf_token %}
+        <button type="submit" class="pay-button">
+            <i class="fas fa-credit-card icon"></i> Proceed to Pay ₹{{ sub_total }}
+        </button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<div class="calendar-strip">
+    {% for day in week %}
+    <div class="calendar-day {% if day.date == today %}active{% endif %}">
+        <div class="day-name">{{ day.name }}</div>
+        <div class="day-number">{{ day.day }}</div>
+        <div class="month-name">{{ day.month }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .calendar-strip {
+        display: flex;
+        overflow-x: auto;
+        padding: 10px 0;
+        margin-bottom: 20px;
+        scrollbar-width: none;
+    }
+
+    .calendar-strip::-webkit-scrollbar {
+        display: none;
+    }
+
+    .calendar-day {
+        min-width: 70px;
+        text-align: center;
+        padding: 10px 0;
+        background-color: #2b2b2b;
+        border-radius: 12px;
+        margin-right: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        color: #ccc;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .calendar-day:hover {
+        background-color: #3c3c3c;
+        color: #fff;
+    }
+
+    .calendar-day.active {
+        background-color: #e50914;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .day-name {
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .day-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .month-name {
+        font-size: 0.75rem;
+    }
+</style>

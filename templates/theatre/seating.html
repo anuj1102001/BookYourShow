@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<style>
+    .curved-screen {
+        background: #343a40;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-top-left-radius: 50% 20px;
+        border-top-right-radius: 50% 20px;              
+        font-weight: bold;
+        width: 60%;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .seat-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .seat-btn {
+        width: 30px;
+        height: 30px;
+        margin: 2px;
+        border-radius: 4px;
+        font-size: 11px;
+        padding: 0;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 28px;
+        transition: all 0.2s ease;
+    }
+
+    .seat-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+
+    .selected-seat {
+        background-color: #28a745 !important;
+        color: white;
+        border: none;
+    }
+
+    .bestseller-seat {
+        background-color: #ffc107 !important;
+        color: black;
+        border: none;
+    }
+
+    .sold-seat {
+        background-color: #6c757d !important;
+        color: white;
+        cursor: not-allowed;
+        border: none;
+    }
+
+    .selected-bestseller-seat {
+        background-color: #17a2b8 !important;
+        color: white;
+        border: none;
+    }
+
+    .legend {
+        position: sticky;
+        bottom: 0;
+        background: #f8f9fa;
+        z-index: 1000;
+        padding: 8px 0;
+        border-top: 1px solid #dee2e6;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .legend .btn {
+        width: 14px;
+        height: 14px;
+        padding: 0;
+        margin-right: 4px;
+        border-radius: 3px;
+    }
+
+    .legend div {
+        font-size: 12px;
+        margin: 2px 6px;
+        display: flex;
+        align-items: center;
+    }
+
+    .legend .d-flex {
+        gap: 10px;
+        justify-content: center;
+    }
+</style>
+
+<div class="container mt-4">
+    <h4>{{ showtime.movie.title }} - {{ showtime.theatre.name }} | {{ formatted_time }}</h4>
+
+    <div class="curved-screen">SCREEN THIS WAY</div>
+
+    <div id="seat-container">
+        {% for row, seats in seat_rows.items %}
+            {% if row == "A" %}
+                <div class="alert alert-secondary py-1 my-2" role="alert">
+                    Rs. 350 CLASSIC (SILVER)
+                </div>
+            {% elif row == "K" %}
+                <div class="alert alert-warning py-1 my-2" role="alert">
+                    Rs. 500 PREMIUM (GOLD)
+                </div>
+            {% elif row == "Q" %}
+                <div class="alert alert-danger py-1 my-2" role="alert">
+                    Rs. 700 RECLINER (LUXURY)
+                </div>
+            {% endif %}
+
+            <div class="seat-row mb-2">
+                <div><strong>{{ row }}</strong></div>
+                <div class="d-flex justify-content-center align-items-center">
+                    {% for seat in seats %}
+                        {% if forloop.counter == 13 %}
+                            <!-- Creating space for the aisle -->
+                            <div class="mx-4"></div>
+                        {% endif %}
+                        <button type="button"
+                            class="btn btn-outline-success btn-sm seat-btn {% if seat.is_sold %}sold-seat{% elif seat.is_bestseller %}bestseller-seat{% endif %}"
+                            data-seat-id="{{ seat.id }}"
+                            data-seat-number="{{ seat }}"
+                            data-row="{{ row }}"
+                            data-price="{% if row <= 'J' %}350{% elif row <= 'P' %}500{% else %}700{% endif %}"
+                            data-category="{% if row <= 'J' %}CLASSIC{% elif row <= 'P' %}PREMIUM{% else %}LUXURY{% endif %}"
+                            {% if seat.is_sold %}disabled{% endif %}>
+                            {{ seat}}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4">
+        <form method="POST" action="{% url 'book_ticket' showtime.id %}">
+            {% csrf_token %}
+            <h5>Selected Seats:</h5>
+            <div id="selected-seats" class="mb-2">None</div>
+            <h6>Total Price: Rs. <span id="total-price">0</span></h6>
+
+            <input type="hidden" name="selected_seats" id="selectedSeatsInput">
+            <input type="hidden" name="total_amount" id="totalAmountInput">
+            <button type="submit" class="btn btn-success mt-2" id="payButton" style="display: none;">Pay ₹0</button>
+        </form>
+    </div>
+
+    <div class="legend mt-4">
+        <div class="d-flex flex-wrap justify-content-around text-center">
+            <div class="d-flex align-items-center"><span class="btn btn-outline-success btn-sm"></span> Available</div>
+            <div class="d-flex align-items-center"><span class="btn btn-success btn-sm"></span> Selected</div>
+            <div class="d-flex align-items-center"><span class="btn btn-warning btn-sm"></span> Bestseller</div>
+            <div class="d-flex align-items-center"><span class="btn btn-secondary btn-sm"></span> Sold</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const seatButtons = document.querySelectorAll('.seat-btn');
+    const selectedSeatsDisplay = document.getElementById('selected-seats');
+    const totalPriceDisplay = document.getElementById('total-price');
+
+    let selectedSeats = [];
+    let totalPrice = 0;
+
+    seatButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const seatId = this.getAttribute('data-seat-id');
+            const seatNum = this.getAttribute('data-seat-number');
+            const seatRow = this.getAttribute('data-row');
+            const seatPrice = parseInt(this.getAttribute('data-price')) || 0;
+
+            if (this.classList.contains('selected-seat') || this.classList.contains('selected-bestseller-seat')) {
+                this.classList.remove('selected-seat');
+                this.classList.remove('selected-bestseller-seat');
+                selectedSeats = selectedSeats.filter(s => s.id !== seatId);
+                totalPrice -= seatPrice;
+            } else {
+                if (this.classList.contains('bestseller-seat')) {
+                    this.classList.add('selected-bestseller-seat');
+                } else {
+                    this.classList.add('selected-seat');
+                }
+                selectedSeats.push({ id: seatId, number: seatNum, row: seatRow, price: seatPrice });
+                totalPrice += seatPrice;
+            }
+
+            updateSummary();
+        });
+    });
+
+    function updateSummary() {
+        const selectedText = selectedSeats.map(s => `Seat ${s.row}${s.number} (Rs. ${s.price})`).join(', ') || 'None';
+        selectedSeatsDisplay.innerHTML = selectedText;
+        totalPriceDisplay.textContent = totalPrice;
+
+        const validSeatData = selectedSeats
+            .filter(s => s.id && !isNaN(Number(s.id)))
+            .map(s => ({ id: s.id, number: s.number }));
+
+        document.getElementById('selectedSeatsInput').value = JSON.stringify(validSeatData);
+        document.getElementById('totalAmountInput').value = totalPrice;
+
+        const payButton = document.getElementById('payButton');
+        if (selectedSeats.length > 0) {
+            payButton.style.display = 'inline-block';
+            payButton.textContent = `Pay ₹${totalPrice}`;
+        } else {
+            payButton.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

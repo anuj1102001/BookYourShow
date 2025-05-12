@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  .ticket-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .ticket-card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    background-color: #ffffff;
+  }
+
+  .ticket-card img {
+    border-radius: 8px;
+    width: 120px;
+    height: 180px;
+    object-fit: cover;
+    margin-right: 20px;
+  }
+
+  .ticket-header {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #2c3e50;
+  }
+
+  .ticket-info {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .ticket-label {
+    font-weight: 600;
+    color: #444;
+  }
+
+  .no-bookings {
+    font-size: 18px;
+    color: #999;
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  .ticket-details {
+    flex-grow: 1;
+  }
+
+  .ticket-poster-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ticket-poster-wrapper img {
+    max-width: 100%;
+    max-height: 200px;
+  }
+
+  .btn-danger {
+    border-radius: 25px !important;
+    padding: 10px 20px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+    transition: 0.3s !important;
+  }
+
+  .btn-danger:hover {
+    background-color: #c82333 !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+    transform: scale(1.03) !important;
+  }
+</style>
+
+<h2>Your Orders History</h2>
+
+{% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if tickets %}
+  {% for ticket_id, ticket in tickets.items %}
+    <div class="ticket-card">
+      <div class="ticket-poster-wrapper">
+        <img src="{{ ticket.booking.showtime.movie.image_url }}" alt="Movie Poster">
+      </div>
+
+      <div class="ticket-details">
+        <div class="ticket-header">Booking ID: {{ ticket.booking.id }}</div>
+
+        <div class="ticket-info"><span class="ticket-label">Movie:</span> {{ ticket.booking.showtime.movie.title }}</div>
+        <div class="ticket-info"><span class="ticket-label">Theatre:</span> {{ ticket.booking.showtime.theatre.name }}</div>
+        <div class="ticket-info"><span class="ticket-label">Showtime:</span> {{ ticket.booking.showtime.start_time|date:"D, d M Y - h:i A" }}</div>
+        <div class="ticket-info"><span class="ticket-label">Seats:</span> 
+          {% for seat in ticket.seats %}
+            {{ seat.seat.seat_number }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </div>
+
+        {% if ticket.payment %}
+          <div class="ticket-info"><span class="ticket-label">Payment ID:</span> {{ ticket.payment.id }}</div>
+          <div class="ticket-info"><span class="ticket-label">Method:</span> {{ ticket.payment.payment_method|capfirst }}</div>
+          {% with total_amount=ticket.payment.amount|add:20 %}
+            <div class="ticket-info"><span class="ticket-label">Amount:</span> ₹{{ total_amount }}</div>
+          {% endwith %}
+          <div class="ticket-info"><span class="ticket-label">Transaction Time:</span> {{ ticket.payment.transaction_time|date:"D, d M Y - h:i A" }}</div>
+        {% else %}
+          <div class="ticket-info" style="color: red;"><strong>Payment not found</strong></div>
+        {% endif %}
+
+        {% if ticket.booking.booking_status != 'cancelled' %}
+          <button type="button" class="btn btn-danger mt-2" onclick="confirmCancellation('{{ ticket.booking.id }}')">
+            Cancel Booking
+          </button>
+        {% else %}
+          <p class="text-muted mt-3"><em>This booking has been cancelled and the amount will be refunded.</em></p>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="no-bookings">You have no confirmed bookings.</p>
+{% endif %}
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="cancelForm" method="POST">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="cancelModalLabel">Cancel Booking</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to cancel this booking?<br>
+          <strong>The amount will be refunded automatically.</strong>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function confirmCancellation(bookingId) {
+    const form = document.getElementById('cancelForm');
+    form.action = "{% url 'cancel_booking' 0 %}".replace('0', bookingId);
+    const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+    modal.show();
+  }
+</script>
+
+{% endblock %}

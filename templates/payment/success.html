@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Confirmed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f1f3f6;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .ticket {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 480px;
+            max-width: 95%;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket::before,
+        .ticket::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #f1f3f6;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .ticket::before {
+            left: -20px;
+        }
+
+        .ticket::after {
+            right: -20px;
+        }
+
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .ticket-header .icon {
+            font-size: 50px;
+            color: #27ae60;
+        }
+
+        .ticket-header h2 {
+            margin: 10px 0 5px;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .ticket-header p {
+            font-size: 15px;
+            color: #7f8c8d;
+        }
+
+        .details {
+            border-top: 1px dashed #ccc;
+            border-bottom: 1px dashed #ccc;
+            padding: 20px 0;
+            margin: 20px 0;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .details div {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .details span {
+            font-weight: 500;
+        }
+
+        .go-back {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background-color: #305eff;
+            color: white;
+            padding: 12px;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .go-back:hover {
+            background-color: #274bcc;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="ticket">
+        <div class="ticket-header">
+            <div class="icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <h2>Booking Confirmed!</h2>
+            <p>Your payment was successful. Enjoy your movie 🎬</p>
+        </div>
+
+        <div class="details">
+            <div><span>Movie:</span> {{ showtime.movie.title }}</div>
+            <div><span>Showtime:</span> {{ showtime.start_time }}</div>
+            <div><span>Seats:</span> {{ selected_seats|join:", " }}</div>
+            <div><span>Amount Paid:</span> ₹{{ booking.total_amount|add:"20" }}</div>
+        </div>
+
+        <a href="{% url 'movies' %}" class="go-back"><i class="fas fa-arrow-left"></i> Go Back Home</a>
+    </div>
+
+</body>
+</html>
