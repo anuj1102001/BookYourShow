@@ -25,12 +25,6 @@ BookYourShow is a full-featured Django-based web application that replicates the
 
 ---
 
-## 📸 Screenshots
-
-> _Coming soon!_ (Add screenshots of your homepage, seat selection, Stripe payment page, and user profile page.)
-
----
-
 ## 🔧 Installation
 
 1. **Clone the repo**
