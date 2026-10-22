@@ -10,22 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Secrets and keys come from environment variables (or a local .env file, which is
+# git-ignored). Copy .env.example to .env and fill it in.
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8wu#g&2p%gz5*it7&7)@@+8kv)q%8pf56sm-f_xj-r@ae#^vld'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-local-development-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h]
 
 
 # Application definition
@@ -155,7 +162,8 @@ AUTHENTICATION_BACKENDS = [
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-           
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
+            'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
             'key': ''
         }
     }
@@ -165,11 +173,14 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 LOGIN_REDIRECT_URL = '/account/home'
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = "suryareddy6969@gmail.com"
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = "suryareddy6969@gmail.com"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_PORT = 587
-EMAIL_HOST_PASSWORD = "fdjw hiko exdn ouor"
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 
 from django.contrib import messages
 MESSAGE_TAGS = {

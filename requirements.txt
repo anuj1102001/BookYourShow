@@ -1,9 +1,8 @@
-django-rest-framework
+Django>=5.1,<5.2
+djangorestframework
 pillow
 django-crispy-forms
 crispy-bootstrap4
 python-dotenv
-
-django-allauth
 django-allauth[socialaccount]
 stripe
