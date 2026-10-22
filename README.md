@@ -1,94 +1,56 @@
-# 🎬 BookYourShow
+# BookYourShow
 
-BookYourShow is a full-featured Django-based web application that replicates the core functionality of platforms like BookMyShow. It allows users to browse movies, log in, book tickets, choose seatings, make payments through Stripe, and track their booking history — all in a sleek and intuitive UI.
+A movie ticket booking web app built with Django, modelled on the core flow of platforms like BookMyShow: browse movies, pick a theatre and showtime, choose seats, pay with Stripe (test mode) and see your past bookings.
 
----
+Built in early 2025 during my Python full-stack bootcamp (QSpiders) as a learning project.
 
-## 🚀 Features
+## Features
 
-- 🎞️ **Movie Listings**: Browse all currently available movies with posters and descriptions.
-- 🔐 **User Authentication**: Register, log in, and manage your account securely.
-- 🎟️ **Movie Ticket Booking**: Click on a movie → choose show timing → select seats → proceed to payment.
-- 💳 **Stripe Integration**: Secure and smooth payment gateway for ticket purchases.
-- 👤 **User Profile**: View and manage your past and current ticket orders.
-- 🧾 **Order History**: Track bookings and payment statuses anytime.
-- ⚙️ **Admin Panel**: Manage movies, showtimes, and bookings from the Django admin dashboard.
+- **Movies:** listings with posters and details, filters, and reviews on the movie page
+- **Accounts:** register and log in with email, or with Google (django-allauth)
+- **Booking:** movie → theatre and showtime → seat selection
+- **Payments:** Stripe checkout in test mode, with success and cancel pages
+- **Orders:** a page listing your bookings and payment status
+- **Admin:** manage movies, theatres, showtimes and bookings in the Django admin
 
----
+## Tech stack
 
-## 🛠️ Built With
+Python · Django 5.1 · Django REST framework · django-allauth · Stripe API · SQLite · HTML, CSS, JavaScript · Bootstrap 4 (crispy-forms)
 
-- [Django]– High-level Python web framework
-- [HTML/CSS/JS] – For responsive frontend
-- [Bootstrap] – For sleek UI components
-- [Stripe API](https://stripe.com/docs/api) – For handling payments securely
+## Run it locally
 
----
-
-## 🔧 Installation
-
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/anuj1102001/BookYourShow.git
-   cd BookYourShow
-Create a virtual environment and activate it
-
-bash
-Copy
-Edit
-python -m venv env
-source env/bin/activate  # On Windows use `env\Scripts\activate`
-Install the dependencies
-
-bash
-Copy
-Edit
+```bash
+git clone https://github.com/anuj1102001/BookYourShow.git
+cd BookYourShow
+python -m venv .venv
+# Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-Add your Stripe API keys in .env or settings
-
-env
-Copy
-Edit
-STRIPE_PUBLIC_KEY=your_public_key
-STRIPE_SECRET_KEY=your_secret_key
-Run migrations and start server
-
-bash
-Copy
-Edit
-python manage.py makemigrations
+cp .env.example .env    # then add your own Stripe test keys
 python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
-📂 Project Structure
-bash
-Copy
-Edit
-BookYourShow/
-├── static/
-├── templates/
-├── movies/              # Main app for movies and bookings
-├── users/               # Handles authentication and profile
-├── payments/            # Stripe payment processing
-├── manage.py
-└── requirements.txt
-✅ Future Improvements
-🎬 Admin movie upload with trailers
+```
 
-📱 Progressive Web App (PWA) for mobile users
+Then add movies, theatres and showtimes in the admin at `http://127.0.0.1:8000/admin/`.
 
-🧾 Downloadable ticket PDFs
+All keys (Django secret key, Stripe, Google sign-in, Gmail SMTP) are read from environment variables or a local `.env` file, which is git-ignored. See [.env.example](.env.example).
 
-📧 Email confirmation after booking
+## Project structure
 
-🌐 SEO & meta tag enhancements
+```
+Accounts/        custom user model, registration and login
+Movies/          movie listings, details and filters
+Theatre/         theatres, seats and showtimes
+Bookings/        seat selection and bookings
+Payment/         Stripe checkout
+Dashboard/       a user's orders
+Reviews/         movie reviews
+book_your_show/  settings and URL configuration
+templates/       HTML templates
+static/          CSS, JavaScript and images
+```
 
-🙌 Contributing
-Contributions, issues, and feature requests are welcome!
-Feel free to fork the repo and submit a pull request.
+## Known gaps
 
-📬 Contact
-Made by Anuj M
-
-DM me on LinkedIn or drop a mail at anujleo46@gmail.com if you'd like to collaborate!
-
-
+- The orders page expects a `dashboard/home.html` template that isn't in the repository yet.
+- Development settings only: not configured for production deployment.
